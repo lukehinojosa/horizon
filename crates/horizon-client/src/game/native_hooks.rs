@@ -6,6 +6,20 @@
 //! Horizon's own HUD extras do, and keep a mod's settings where the
 //! WebAssembly mod of the same id kept them.
 //!
+//! API 68 adds stack-dependent image tooltip components, measured with `native_tooltip_component` and rendered with `native_tooltip_component_draw`.
+//!
+//! API 67 adds dispenser item behaviours (`native_dispense_item`) and `native_dispense_default` for a plain drop.
+//!
+//! API 66 adds explosions for server mods (`native_explode`, in
+//! `native_explosions.rs`).
+//!
+//! API 65 adds native item component type registration (`native_component_types`) and opaque NBT component helpers.
+//!
+//! API 64 adds comparator output from a mod's block (`native_has_analog_output`,
+//! `native_analog_output`, and the helper `native_update_output_neighbors`).
+//!
+//! API 63 adds context-free tag lookups for server hooks (`native_server_block_in_tag`, `native_server_item_in_tag`).
+//!
 //! API 62 adds nicknames for server mods: `native_set_nickname` shows a name in place of a player's in chat and
 //! the Tab list (the real one on hover), and `native_text_allowed` asks the server's chat filter, in
 //! `native_server.rs`.
@@ -268,7 +282,7 @@ pub(super) use horizon_world::level::flags;
 /// The hook points' API version. The launcher reads this line from the
 /// source it builds; keep its form.
 #[allow(dead_code)]
-pub(crate) const NATIVE_HOOKS_API: u32 = 62;
+pub(crate) const NATIVE_HOOKS_API: u32 = 68;
 
 impl GameLevel<'_> {
     /// An authoritative server committed a changed state through `Level.setBlock`.
@@ -368,7 +382,7 @@ impl GameLevel<'_> {
     /// that comparators read (how full or far along it is, as a composter's
     /// level), so they ask `native_analog_output`. Asked from inside the
     /// level's update: answer from `state` alone. Authoritative servers only.
-    /// API @API:analog_output@.
+    /// API 64.
     #[inline(always)]
     pub(super) fn native_has_analog_output(&self, state: BlockStateId, output: &mut bool) {
         let _ = (state, output);
@@ -384,7 +398,7 @@ impl GameLevel<'_> {
     /// `native_update_output_neighbors`; a change of state through
     /// `native_set_block` or `native_set_block_property` (neighbour updates
     /// on) tells the comparators itself, as vanilla's `Level.setBlock` does.
-    /// Authoritative servers only. API @API:analog_output@.
+    /// Authoritative servers only. API 64.
     #[inline(always)]
     pub(super) fn native_analog_output(
         &self,
@@ -1211,7 +1225,7 @@ impl Game<'_> {
     /// level event the dispenser plays with its smoke: 1000 the click, 1001 the
     /// fail sound (`OptionalDispenseItemBehavior` without success), or 0 for
     /// nothing at all (`DispenseItemBehavior.NOOP`). To drop one normally,
-    /// answer `(native_dispense_default(..), 1000)`. API @API:dispenser_behaviour@.
+    /// answer `(native_dispense_default(..), 1000)`. API 67.
     pub(super) fn native_dispense_item(
         &mut self,
         dimension: &str,
@@ -2003,7 +2017,7 @@ impl Game<'_> {
     /// beside it, or behind a conductor there, read it again
     /// (`Level.updateNeighbourForOutputSignal`). Acts on the level in place:
     /// false (and nothing happens) when `dimension` is another, or this
-    /// window isn't a server. API @API:analog_output@.
+    /// window isn't a server. API 64.
     pub(super) fn native_update_output_neighbors(
         &mut self,
         dimension: &str,
